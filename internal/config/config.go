@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"github.com/ilyakaznacheev/cleanenv"
 	"log"
 	"os"
@@ -8,11 +9,18 @@ import (
 )
 
 type Config struct {
-	Env         string `yaml:"env" env-Default:"local"`
-	StoragePath string `yaml:"storage_path" env-required:"true"`
-	HTTPServer  `yaml:"http_server"`
+	Env        string `yaml:"env" env-Default:"local"`
+	DB         `yaml:"db" env-required:"true"`
+	HTTPServer `yaml:"http_server"`
 }
 
+type DB struct {
+	User     string `yaml:"user" env:"DB_USER" env-required:"true"`
+	Password string `yaml:"password" env:"DB_PASSWORD" env-required:"true"`
+	Host     string `yaml:"host" env-required:"true"`
+	Port     string `yaml:"port" env-required:"true"`
+	DBName   string `yaml:"dbname" env:"DB_NAME" env-required:"true"`
+}
 type HTTPServer struct {
 	Address     string        `yaml:"address" env-default:"localhost:8080"`
 	Timeout     time.Duration `yaml:"timeout" env-default:"4s"`
@@ -33,4 +41,11 @@ func MustLoad() *Config {
 		log.Fatalf("cannot read config: %s", err)
 	}
 	return &cfg
+}
+
+func (c *Config) ConnString() string {
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		c.User, c.Password, c.Host, c.Port, c.DBName,
+	)
 }

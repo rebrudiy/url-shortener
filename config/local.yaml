@@ -1,5 +1,10 @@
 env: "local"
-storage_path: "./storage/storage.db"
+db:
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}
+  host: localhost
+  port: 5432
+  dbname: ${DB_NAME}
 http_server:
   address: "localhost:8082"
   timeout: 4s
